@@ -73,40 +73,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 
-// $db['default'] = array(
-// 	'dsn'	=> '',
-// 	'hostname' => 'adrienecarreamigable0115516.ipagemysql.com',
-// 	// 'hostname' => 'localhost',
-// 	'username' => 'mikkostore1',
-// 	'password' => 'Thequick!123',
-// 	// 'username' => 'root',
-// 	// 'password' => '',
-// 	// 'database' => 'db_coffeeshop',
-// 	'database' => 'db_mikkostore',
-// 	'dbdriver' => 'mysqli',
-// 	'dbprefix' => '',
-// 	'pconnect' => FALSE,
-// 	'db_debug' => (ENVIRONMENT !== 'production'),
-// 	'cache_on' => FALSE,
-// 	'cachedir' => '',
-// 	'char_set' => 'utf8',
-// 	'dbcollat' => 'utf8_general_ci',
-// 	'swap_pre' => '',
-// 	'encrypt' => FALSE,
-// 	'compress' => FALSE,
-// 	'stricton' => FALSE,
-// 	'failover' => array(),
-// 	'save_queries' => TRUE
-// );
-
 $db['default'] = array(
 	'dsn'	=> '',
-	// 'hostname' => 'adrienecarreamigable0115516.ipagemysql.com',
-	'hostname' => 'localhost',
-	// 'username' => 'coffe_shop',
-	// 'password' => 'Thequick_123',
-	'username' => 'root',
-	'password' => '',
+	'hostname' => 'adrienecarreamigable0115516.ipagemysql.com',
+	// 'hostname' => 'localhost',
+	'username' => 'mobile_wallet',
+	'password' => 'mobile_wallet',
+	// 'username' => 'root',
+	// 'password' => '',
 	// 'database' => 'db_coffeeshop',
 	'database' => 'mobile_wallet',
 	'dbdriver' => 'mysqli',
@@ -124,3 +98,29 @@ $db['default'] = array(
 	'failover' => array(),
 	'save_queries' => TRUE
 );
+
+// $db['default'] = array(
+// 	'dsn'	=> '',
+// 	// 'hostname' => 'adrienecarreamigable0115516.ipagemysql.com',
+// 	'hostname' => 'localhost',
+// 	// 'username' => 'coffe_shop',
+// 	// 'password' => 'Thequick_123',
+// 	'username' => 'root',
+// 	'password' => '',
+// 	// 'database' => 'db_coffeeshop',
+// 	'database' => 'mobile_wallet',
+// 	'dbdriver' => 'mysqli',
+// 	'dbprefix' => '',
+// 	'pconnect' => FALSE,
+// 	'db_debug' => (ENVIRONMENT !== 'production'),
+// 	'cache_on' => FALSE,
+// 	'cachedir' => '',
+// 	'char_set' => 'utf8',
+// 	'dbcollat' => 'utf8_general_ci',
+// 	'swap_pre' => '',
+// 	'encrypt' => FALSE,
+// 	'compress' => FALSE,
+// 	'stricton' => FALSE,
+// 	'failover' => array(),
+// 	'save_queries' => TRUE
+// );
