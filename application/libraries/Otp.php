@@ -53,6 +53,9 @@ class Otp extends MY_Controller {
             $data['email'] = $payload['email'];
         }
 
+        if(isset($payload['mobile'])){
+            $data['mobile'] = $payload['mobile'];
+        }
         $this->CI->db->insert('otp_codes', $data);
         return $data;
     }
@@ -67,6 +70,9 @@ class Otp extends MY_Controller {
         }
         if(isset($data['device_id'])){
             $this->CI->db->where('foreign_id', $data['device_id']);
+        }
+        if(isset($data['mobile'])){
+            $this->CI->db->where('mobile', $data['mobile']);
         }
         
         $this->CI->db->where('otp', $data['otp']);

@@ -48,9 +48,6 @@
         address.province,
         address.city,
         address.barangay,
-        address.barangay,
-        address.barangay,
-        address.barangay,
         source_of_funds.source_of_funds
         ');
         $this->db->from('accounts');

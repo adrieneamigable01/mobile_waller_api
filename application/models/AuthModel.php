@@ -15,6 +15,7 @@
         accounts.account_id,
         accounts.mobile,
         accounts.status,
+        accounts.mpin,
         customer.customer_id,
         customer.firstname,
         customer.middlename,
@@ -28,9 +29,6 @@
         address.province,
         address.city,
         address.barangay,
-        address.barangay,
-        address.barangay,
-        address.barangay,
         source_of_funds.source_of_funds
         ');
         $this->db->from('accounts');
@@ -41,7 +39,7 @@
         $query = $this->db->get();
         return $query->result();
     }
-    public function getAccount($payload){
+     public function getAccount($payload){
         $this->db->select('accounts.account_id,
         accounts.account_id,
         accounts.mobile,
@@ -59,9 +57,6 @@
         address.province,
         address.city,
         address.barangay,
-        address.barangay,
-        address.barangay,
-        address.barangay,
         source_of_funds.source_of_funds
         ');
         $this->db->from('accounts');
@@ -77,6 +72,10 @@
     }
     public function addAccount($payload){
         return $this->db->set($payload)->get_compiled_insert('accounts');
+    }
+    public function updateAccount($payload,$where){
+        $this->db->where($where);
+        return $this->db->set($payload)->get_compiled_update('accounts');
     }
     public function linkAccount($payload){
         return $this->db->set($payload)->get_compiled_insert('linked_devices');

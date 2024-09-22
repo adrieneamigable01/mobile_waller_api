@@ -143,6 +143,117 @@
             }
             $this->response->output($return,1); //return the json encoded data
         }
+        public function pinticate(){
+
+            /**
+             * @var string post data $userName
+             * @var string post data $password
+             * @var array  data $return
+            */
+            $mobile = $this->input->post('mobile');
+            $device_id = $this->input->post('device_id');
+            $mpin = $this->input->post('mpin');
+            $return   = array();
+
+            // conditions
+            //this will filter so that no php error will found
+            if(empty($mobile)){ //check if the username and password is not empty
+                $return = array(
+                    'isError' =>true,
+                    // 'code'     =>http_response_code(),
+                    'message'   =>'Mobile number in required',
+                );
+            }else if(empty($device_id)){ //check if the username and password is not empty
+                $return = array(
+                    'isError' =>true,
+                    // 'code'     =>http_response_code(),
+                    'message'   =>'device id is required',
+                );
+            }else if(empty($mpin)){ //check if the username and password is not empty
+                $return = array(
+                    'isError' =>true,
+                    // 'code'     =>http_response_code(),
+                    'message'   =>'MPin is required',
+                );
+            }else{
+               //set payload
+                $payload = array('accounts.mobile' => $mobile);
+                /** 
+                    * Call the auth  model
+                    * then call the authenticate method
+                    * @param array $payload.
+                */
+                $authenticate = $this->AuthModel->authenticate($payload);
+                
+               
+                try{
+                    if(count($authenticate) > 0){
+
+                        if($authenticate[0]->mpin === $mpin){
+                            $data = array(
+                                'account_id'        => $authenticate[0]->account_id,
+                                'mobile'            => $authenticate[0]->mobile,
+                                'status'            => $authenticate[0]->status,
+                                'customer_id'       => $authenticate[0]->customer_id,
+                                'fullName'          => $authenticate[0]->lastname.', '.$authenticate[0]->firstname.', '.$authenticate[0]->middlename,
+                                'firstname'         => $authenticate[0]->firstname,
+                                'middlename'        => $authenticate[0]->middlename,
+                                'lastname'          => $authenticate[0]->lastname,
+                                'birthdate'         => $authenticate[0]->birthdate,
+                                'email'             => $authenticate[0]->email,
+                                'nationality'       => $authenticate[0]->nationality,
+                                'province'          => $authenticate[0]->province,
+                                'city'              => $authenticate[0]->city,
+                                'barangay'          => $authenticate[0]->barangay,
+                                'source_of_funds'   => $authenticate[0]->source_of_funds,
+                                'source_of_funds_id'   => $authenticate[0]->source_of_funds_id,
+                                'deviceLinked'      => $this->CustomerModel->checkIfDevicesExist(array(
+                                    'linked_devices.device_id' => $device_id,
+                                    'accounts.mobile' => $authenticate[0]->mobile,
+                                ))
+                            );
+
+                            $jwtpayload = array(
+                                "iss" => "https://mobile-wallet-app.doitcebu.com",
+                                "aud" => "mobile-wallet-app",
+                                "iat" => time(),
+                                "exp" => time() + (60 * 60),  // Token expires in 1 hour
+                                "data" => $data
+                            );
+
+                            $jwt = generate_jwt($jwtpayload, $this->config->item('jwt_key'));
+                            $data['token'] = $jwt;
+                            $return = array(
+                                'isError'      => false,
+                                'message'        =>'Login successfuly',
+                                'data'  => $data,
+                                'token' => $jwt,
+                            );  
+
+                        }else{
+                            $return = array(
+                                'isError' => true,
+                                'message'   =>'Incorrect MPIN',
+                            );
+                        }
+                        
+                        
+                    }else{
+                        $return = array(
+                            'isError' => true,
+                            'message'   =>'User not found',
+                        );
+                    }
+                }catch (Exception $e) {
+                    //set the server error
+                    $return = array(
+                        'isError' => true,
+                        'message'   => $e->getMessage(),
+                    );
+                }
+            }
+            $this->response->output($return,1); //return the json encoded data
+        }
         public function sendRegiserAccountOTP(){
             $device_id = $this->input->post("device_id");
 
@@ -221,8 +332,9 @@
                         'message'   => "Invalid or expired OTP.",
                     );
                 }
-                $this->response->output($return); //echo the json encoded data
+               
             }
+            
         }
         public function sendLinkAccountOTP(){
             $device_id = $this->input->post("device_id");
@@ -360,6 +472,160 @@
                 
             }
 
+            $this->response->output($return); //echo the json encoded data
+        }
+        public function sendResetMPINOTP(){
+            $device_id = $this->input->post("device_id");
+            $mobile = $this->input->post("mobile");
+
+            if(empty($device_id)){
+                $return = array(
+                    '_isError' => true,
+                    // 'code'     =>http_response_code(),
+                    'message'   => "Empty device id",
+                );
+            } else  if(empty($mobile)){
+                $return = array(
+                    '_isError' => true,
+                    // 'code'     =>http_response_code(),
+                    'message'   => "Empty Mobile number",
+                );
+            }
+            else{
+                
+                $payload= array(
+                    'email' => 'adrienecarreamigable01@gmail.com',
+                    'action' => 'reset_mpin',
+                    'mobile' => $mobile,
+                    'foreign_id' => $device_id
+                );
+                $res = $this->otp->generate_otp($payload);
+                if($res){
+                    $return = array(
+                        'isError' => false,
+                        // 'code'     =>http_response_code(),
+                        'message'   => "Please enter OTP",
+                    );
+                }else{
+                    $return = array(
+                        'isError' => true,
+                        // 'code'     =>http_response_code(),
+                        'message'   => "Error sending OTP",
+                    );
+                }
+                
+            }
+
+            $this->response->output($return); //echo the json encoded data
+        }
+        public function verifyResetMPINOTP(){
+           
+            $transQuery         = array();
+            $device_id = $this->input->post("device_id");
+            $otp = $this->input->post("otp");
+            $mobile = $this->input->post("mobile");
+           
+            if(empty($device_id)){
+                $return = array(
+                    'isError' => true,
+                    // 'code'     =>http_response_code(),
+                    'message'   => 'Empty device id',
+                );
+            }else if(empty($otp)){
+                $return = array(
+                    'isError' => true,
+                    // 'code'     =>http_response_code(),
+                    'message'   => 'Empty OTP code',
+                );
+            }else if(empty($mobile)){
+                $return = array(
+                    'isError' => true,
+                    // 'code'     =>http_response_code(),
+                    'message'   => 'Empty mobile number',
+                );
+            }else{
+                
+                
+                $payload= array(
+                    'email' =>'adrienecarreamigable01@gmail.com',
+                    'otp' =>$otp,
+                    'mobile' =>$mobile,
+                    'action' =>'reset_mpin',
+                    'foreign_id' =>$device_id
+                );
+                
+                $validOTP = $this->otp->validate_otp($payload,1);
+              
+                if($validOTP){
+                    $return = array(
+                        'isError' => false,
+                        // 'code'     =>http_response_code(),
+                        'message'   => "Success",
+                    );
+                }else{
+                    $return = array(
+                        'isError' => true,
+                        // 'code'     =>http_response_code(),
+                        'message'   => "Invalid or expired OTP.",
+                    );
+                }
+                $this->response->output($return); //echo the json encoded data
+            }
+        }
+        public function resetMPIN(){
+            $transQuery         = array();
+            $device_id = $this->input->post("device_id");
+            $mpin = $this->input->post("mpin");
+            $mobile = $this->input->post("mobile");
+           
+            if(empty($device_id)){
+                $return = array(
+                    'isError' => true,
+                    // 'code'     =>http_response_code(),
+                    'message'   => 'Empty device id',
+                );
+            }else if(empty($mpin)){
+                $return = array(
+                    'isError' => true,
+                    // 'code'     =>http_response_code(),
+                    'message'   => 'Empty MPIN',
+                );
+            }else if(empty($mobile)){
+                $return = array(
+                    'isError' => true,
+                    // 'code'     =>http_response_code(),
+                    'message'   => 'Empty mobile number',
+                );
+            }else{
+                
+                
+                $payload= array(
+                    'mpin' => $mpin,
+                );
+
+                $where = array(
+                    'mobile' =>$mobile
+                );
+                
+                $updateAccountQuery = $this->AuthModel->updateAccount($payload,$where);
+                array_push($transQuery, $updateAccountQuery);
+                $result = array_filter($transQuery);
+                $res = $this->response->mysqlTQ($result);
+                if($res){
+                    $return = array(
+                        'isError' => false,
+                        // 'code'     =>http_response_code(),
+                        'message'   => "Successfuly update MPIN",
+                    );
+                }else{
+                    $return = array(
+                        'isError' => true,
+                        // 'code'     =>http_response_code(),
+                        'message'   => "Error updating MPIN",
+                    );
+                }
+              
+            }
             $this->response->output($return); //echo the json encoded data
         }
         /* Logout user */
